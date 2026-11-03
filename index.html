@@ -2480,6 +2480,10 @@ function settleWin(winnerSeat, totalTai, payerSeat){
    看門狗／有聲接手確認整套移除。備援：影片真失敗（error 事件）→
    重繪三隻 syncDance 靜圖舞，歌曲照樣由元素播放、不受影響。 */
 var winVideoEl=$("winVideo"), winVideoFailed=false, winVideoMode=false, winVideoPending=false, winVideoArmed=false;
+/* 跳舞卡頓修復（2026-11-02，DD 定案／小弟實作／DD 校正）：video 元素在 init
+   就永久搬進 #winStageSlot——iOS 搬動 media element 會使預載與解碼狀態失效，
+   慶祝當下才搬正是開播頓挫來源之一；setWinVideoMode 不再搬進搬出。 */
+if(winVideoEl){ var __stageSlot0=$("winStageSlot"); if(__stageSlot0 && winVideoEl.parentNode!==__stageSlot0) __stageSlot0.appendChild(winVideoEl); }
 /* 慶祝影片合成層定版：winOverlay 在 #rotRoot（CSS rotate transform 容器）
    裡面，iOS 對 transform 祖先底下的 <video> 常不給硬體解碼、走軟體合成
    就卡。改法：播放期間把 <video> 元素搬到 body 直屬的頂層固定 overlay
@@ -2498,7 +2502,7 @@ function setWinVideoMode(on){
   if(on){
     if(stage && winVideoEl){
       var slot=$("winStageSlot");
-      if(slot && winVideoEl.parentNode!==slot) slot.appendChild(winVideoEl);
+      /* video 已於 init 時永久駐留 slot，慶祝時不再搬動（見 winVideoEl 宣告處） */
       var tt=$("winStageTitle");
       if(tt) tt.textContent=$("winTitle").textContent;
       /* 結算明細定版：台數拆解＋貓糧結算直接顯示在影片下方，不用按鈕
@@ -2524,8 +2528,8 @@ function setWinVideoMode(on){
   } else {
     if(stage){ stage.classList.remove("show","has-detail"); stage.setAttribute("aria-hidden","true"); }
     document.body.classList.remove("celebrating");
-    var wrapEl=$("winVideoWrap");
-    if(wrapEl && winVideoEl && winVideoEl.parentNode!==wrapEl) wrapEl.appendChild(winVideoEl);
+    /* video 永久駐留 stage slot，結束慶祝也不搬回 winBox（wrap 從此為空殼，
+       .win-video-wrap 相關 CSS 僅餘空規則、無作用，保留不刪以利對照舊版） */
   }
 }
 function applyWinFallback(){
@@ -2654,18 +2658,53 @@ if(winVideoEl){
   winVideoEl.addEventListener("playing", function(){
     try{ winVideoEl.loop=true; }catch(e){}
   });
-  /* 音畫漂移校正（定版：只校音訊、永不 seek 影片）：影片（30.1s）
-     與歌曲（30.14s）同 loop，以影片時鐘為準——同圈內誤差 >0.45s
-     就把歌曲（danceAudio）currentTime 對齊影片；seek 影片會觸發
-     解碼器重置、是畫面中段頓挫的來源之一，故校正一律動音訊不動
-     影片。跨圈邊界（diff≈±30.1）是迴圈點差、不校正。timeupdate
-     約 4Hz、成本低。 */
+  /* 音畫同步守護（2026-11-02 重做，取代舊 timeupdate 校正）：舊版校正掛在
+     影片 timeupdate 上——影片卡住時不觸發、恢復後硬 seek 跳針，且不計 loop
+     圈數，漂移逐圈累積（使用者實機回報「音樂到後面對不上」）。新版：
+     (1) 雙邊 timeupdate 只做圈數偵測（currentTime 倒退 >0.5s 記一圈）；
+     (2) syncCheck 由獨立 400ms 計時器驅動（startCelebration 起、stop 停），
+     以「圈數×片長＋currentTime」的有效時間比對，誤差 >0.45s 只 seek 音訊
+     （定版不變：永不 seek 影片），目標值以歌曲片長取模正規化，單次圈數
+     誤判會被取模自動抵消；(3) 影片 waiting/stalled 時歌曲跟著停，
+     playing 恢復時先 syncCheck 對齊再續播，卡頓期間不累積漂移。 */
+  var syncTimer=null, vidLoops=0, audLoops=0, lastVidT=-1, lastAudT=-1, songStalled=false;
+  var syncCheck=function(){
+    if(!winVideoMode || !danceSongOn || !danceAudioEl || !winVideoEl) return;
+    var vidDur=winVideoEl.duration, audDur=danceAudioEl.duration;
+    if(!(vidDur>0) || !(audDur>0)) return;
+    var effV=vidLoops*vidDur+winVideoEl.currentTime;
+    var effA=audLoops*audDur+danceAudioEl.currentTime;
+    var diff=effA-effV;
+    if(Math.abs(diff)>0.45){
+      var norm=effV%audDur; if(norm<0) norm+=audDur;
+      try{ danceAudioEl.currentTime=norm; }catch(e){}
+    }
+  };
   winVideoEl.addEventListener("timeupdate", function(){
     try{
-      if(!winVideoMode || !danceSongOn || !danceAudioEl || danceAudioEl.paused) return;
-      var diff=danceAudioEl.currentTime-winVideoEl.currentTime;
-      if(Math.abs(diff)>0.45 && Math.abs(Math.abs(diff)-30.1)>0.45){ danceAudioEl.currentTime=winVideoEl.currentTime; }
+      var t=winVideoEl.currentTime;
+      if(lastVidT>=0 && t<lastVidT-0.5) vidLoops++;
+      lastVidT=t;
     }catch(e){}
+  });
+  if(danceAudioEl) danceAudioEl.addEventListener("timeupdate", function(){
+    try{
+      var t=danceAudioEl.currentTime;
+      if(lastAudT>=0 && t<lastAudT-0.5) audLoops++;
+      lastAudT=t;
+    }catch(e){}
+  });
+  var __songStall=function(){
+    if(danceSongOn && danceAudioEl && !danceAudioEl.paused){ try{ danceAudioEl.pause(); }catch(e){} songStalled=true; }
+  };
+  winVideoEl.addEventListener("waiting", __songStall);
+  winVideoEl.addEventListener("stalled", __songStall);
+  winVideoEl.addEventListener("playing", function(){
+    if(songStalled){
+      songStalled=false;
+      syncCheck();
+      if(danceSongOn && danceAudioEl && danceAudioEl.paused){ try{ var p=danceAudioEl.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
+    }
   });
   /* 頁面載入時只預抓 metadata（幾 KB）；全量預載改在開局觸發
      （__armWinVideo：btnStart 手勢／newGame 呼叫，maybeArmWinVideo
@@ -2687,8 +2726,13 @@ if(winVideoEl){
 function startCelebration(){
   startDanceSong(); /* 歌曲（專屬元素）先起：與影片靜音播放獨立，影片還在載也照唱 */
   startWinVideo();
+  /* 同步守護計時器（見 winVideoEl 註冊段）：重置圈數狀態後啟動 */
+  vidLoops=0; audLoops=0; lastVidT=-1; lastAudT=-1; songStalled=false;
+  if(syncTimer) clearInterval(syncTimer);
+  syncTimer=setInterval(syncCheck, 400);
 }
 function stopCelebration(){
+  if(syncTimer){ clearInterval(syncTimer); syncTimer=null; }
   stopDanceSong();
   stopWinVideo();
 }
