@@ -261,7 +261,7 @@ button.tile.drawn{outline:2px solid var(--teal);outline-offset:2px;transform:tra
 .win-settle .neg{color:var(--red);font-weight:800}
 #btnRefill{display:none;margin:10px auto 0}
 #btnRefill.show{display:inline-block}
-.win-video-wrap video{width:100%;height:auto;display:block;border-radius:14px;background:#101010;aspect-ratio:640/344;box-shadow:0 14px 30px rgba(38,34,29,.28)}
+.win-video-wrap video{width:100%;height:auto;display:block;border:1px solid rgba(201,168,106,.55);background:#101010;aspect-ratio:640/344}
 .beat-row{display:flex;justify-content:center;align-items:center;gap:7px;font-size:18px;margin:2px 0 4px;color:var(--gold);font-weight:800}
 .beat-row span{display:inline-block;animation:beatPulse .48s ease-in-out infinite}
 .beat-row .beat-txt{font-size:12px;animation:none;color:var(--muted);font-weight:600;letter-spacing:.03em}
@@ -781,11 +781,13 @@ body.rotated .meld-group .tile.mini .bamboo{width:3px;height:6.5px}
    ——stage 是唯一慶祝 UI，結算盒不再隔著面紗透出鬼影。 */
 #winStage{position:fixed;left:var(--app-x,0px);top:var(--app-y,0px);width:var(--app-w,100dvw);height:var(--app-h,100dvh);z-index:300;display:none;background:rgba(9,14,11,.68)}
 #winStage.show{display:block}
+#winVideoTop{position:fixed;z-index:310;display:none;background:#000;border:1px solid rgba(201,168,106,.55);box-sizing:border-box}
+#winVideoTop.show{display:block}
 .win-stage-rot{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;padding:12px;box-sizing:border-box;overflow:hidden}
 body.rotated .win-stage-rot{width:var(--rw,100dvh);height:var(--rh,100vw);transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
 .win-stage-title{font-family:"Noto Serif TC","Noto Sans TC",serif;font-weight:900;font-size:clamp(20px,4.4dvh,32px);color:#e9b949;letter-spacing:.05em;text-align:center;flex:none;line-height:1.25;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .win-stage-slot{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
-.win-stage-slot video{display:block;width:auto;height:auto;max-width:min(660px,94%);max-height:100%;aspect-ratio:640/344;background:#000;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.5)}
+.win-stage-slot video{display:block;width:auto;height:auto;max-width:min(660px,94%);max-height:100%;aspect-ratio:640/344;background:#000;border:1px solid rgba(201,168,106,.55)}
 .win-stage-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;flex:none}
 .win-stage-btns .btn{min-height:42px}
 /* 結算明細直接顯示在 stage 影片下方（定版：不用按鈕切換）：內容鏡射
@@ -805,7 +807,7 @@ body.rotated .win-stage-rot{width:var(--rw,100dvh);height:var(--rh,100vw);transf
 #btnStageRefill{display:none}
 #btnStageRefill.show{display:block;width:fit-content;margin:8px auto 0}
 body.celebrating .win-box{visibility:hidden}
-body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;visibility:hidden}
 .win-box.video-mode .win-video-wrap{display:none} /* 影片已搬去頂層 stage，本盒不再留空框 */
 </style>
 </head>
@@ -817,7 +819,7 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
   <div class="start-box">
     <div class="st-kicker">台 灣 十 六 張 ・ 3 D 牌 桌</div>
     <h2>貓貓麻將大戰</h2>
-    <p class="st-sub">你坐莊（南家），對面是 Maxwell、右邊 Pop Cat、左邊 CatJAM。<br>湊齊 5 組牌 + 1 對將就胡牌！</p>
+    <p class="st-sub">四家輪流坐莊（照規局輪莊），對面是 Maxwell、右邊 Pop Cat、左邊 CatJAM。<br>湊齊 5 組牌 + 1 對將就胡牌！</p>
     <div class="start-cats">
       <img src="assets/trio-cap.webp" alt="小貓・白底深灰斑頭">
       <img src="assets/trio-cream.webp" alt="小貓・奶油">
@@ -873,7 +875,7 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
       <button class="btn" id="btnHome" type="button">🏠 開始畫面（改貓糧賭注）</button>
     </div>
     <div class="stats">
-      <span class="stat">🧭 <b>南</b>局・你坐莊（南家）</span>
+      <span class="stat">🧭 <b id="statDealer">東局・你坐莊</b></span>
       <span class="stat">牌牆剩 <b id="statWall">–</b> 張</span>
       <span class="stat">第 <b id="statTurn">0</b> 巡</span>
       <span class="stat">你胡了 <b class="green" id="statWins">0</b> 次</span>
@@ -1007,7 +1009,7 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
     <div style="font-weight:800;padding:10px 0;font-size:14.5px;letter-spacing:.04em">🧮 算台台表・🐾 貓糧結算（貓貓屋規則）</div>
     <ul>
       <li><b>結算公式：</b>每胡一手，金額 ＝ <b>底 ＋ 總台 × 每台</b>（貓糧「顆」計價，全程不出現現金）。榮和（放槍）：放槍者付一份給贏家；自摸：其餘三家各付一份，贏家收三份；流局不結算。底／每台／四家起始貓糧在<b>開始畫面</b>設定（預設 正常檔：底 30／每台 10／起始 3,000 顆；另有小玩 10/5、大玩 50/20 與自訂數字），開局後沿用，要改從右上設定選單回開始畫面。任一家貓糧歸零時，結算畫面會出現「🐾 補糧」鈕，按下後全員回到起始貓糧額度；結算時每家最多付到歸零為止，餘額不會變成負數、也不會卡局——不補糧也可以按「繼續」接著打，或按「離開」回開始畫面。</li>
-      <li><b>本遊戲採用的台表</b>（台灣十六張常見台種，依本遊戲性質調整）：莊家 1（你固定莊家，貓貓屋規則）・自摸 1・門清 1・圈風刻（東風刻）1・門風刻 1（座位風：你＝東、Pop＝南、Maxwell＝西、CatJAM＝北；莊家東風刻同時算圈風＋門風＝2）・三元刻每個 1・花牌每朵 1・平胡 1・海底撈月／河底撈魚 1・碰碰胡 4・混一色 4・小三元 4・清一色 8・大三元 8・字一色 16。色系台互斥取一（字一色＞清一色＞混一色）；三元刻台與大／小三元分開計。</li>
+      <li><b>本遊戲採用的台表</b>（台灣十六張常見台種，依本遊戲性質調整）：莊家 1（當局莊家）・自摸 1・門清 1・圈風刻（當局圈風）1・門風刻 1（座位風依莊家算：莊家＝東、其下家＝南、對家＝西、上家＝北；莊家在東局胡東風刻同時算圈風＋門風＝2）・三元刻每個 1・花牌每朵 1・平胡 1・海底撈月／河底撈魚 1・碰碰胡 4・混一色 4・小三元 4・清一色 8・大三元 8・字一色 16。色系台互斥取一（字一色＞清一色＞混一色）；三元刻台與大／小三元分開計。・流局：莊家有聽牌連莊、沒聽換下家坐莊。</li>
       <li><b>誠實標示的簡化處：</b>① 門清照真規則：完全沒吃／碰／明槓（全暗牌，或只有暗槓）才計 1 台，有任何副露就不算門清。② 花牌不分正花／野花，每朵一律 1 台。③ 平胡照標準將牌限制：全順子之外，將牌若是<b>值字</b>（圈風東／自己的門風／三元牌）就不算平胡；非值字的風牌作將可以平胡（兩面聽細節從略）。④ 胡牌分解若有多種拆法，取總台最高的一種（對贏家最有利的常見作法）。⑤ 三家對手是真手牌出牌，一樣會自摸與榮和、照同一套算台結算，你放槍也要付貓糧。⑥ 叫牌按「過」＝這張牌的胡／碰／槓／吃全部放棄（真規則過胡後對同張的限制從略）。</li>
     </ul>
   </section>
@@ -1021,7 +1023,7 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
   <div class="win-box" id="winBox">
     <h2 id="winTitle">🎉 你胡啦！</h2>
     <div class="win-video-wrap" id="winVideoWrap">
-      <video id="winVideo" src="assets/trio-dance-lite3.mp4" playsinline webkit-playsinline preload="metadata" loop muted aria-label="三隻小貓跳舞影片"></video><audio id="danceAudio" src="assets/trio-dance-audio.mp3" preload="none" loop aria-label="跳舞歌曲"></audio>
+      <video id="winVideo" src="assets/trio-dance-lite4.mp4" playsinline webkit-playsinline preload="metadata" loop muted aria-label="三隻小貓跳舞影片"></video><audio id="danceAudio" src="assets/trio-dance-audio.mp3" preload="none" loop aria-label="跳舞歌曲"></audio>
     </div>
     <div class="dancers" id="winDancers">
       <figure class="dancer sync-dancer" style="margin:0">
@@ -1072,6 +1074,8 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
     </div>
   </div>
 </div>
+<!-- 直向（旋轉模式）專用頂層影片：body 直屬、零 transform 祖先，播實體預旋轉的 lite5；由 JS 依 #winStageSlot 的實測矩形定位（見引擎 winVideoTopEl 段）。 -->
+<video id="winVideoTop" src="assets/trio-dance-lite5.mp4" playsinline webkit-playsinline preload="metadata" loop muted aria-label="三隻小貓跳舞影片（直向）"></video>
 <script>
 "use strict";
 /* ============ 台灣十六張牌型 ============
@@ -1321,7 +1325,7 @@ var CATS=[
 ];
 var G={ wall:[], dead:[], hand:[], pools:[[],[],[],[]], poolAll:[], botHands:[[],[],[]], flowers:[[],[],[],[]], turn:0, wins:0, dances:0,
         phase:"idle", drawnIdx:-1, ronTile:null, ronFrom:-1, timers:[], balances:null,
-        melds:[[],[],[],[]], callCtx:null };
+        melds:[[],[],[],[]], callCtx:null, dealer:3, renchan:0, roundWind:1, roundStart:3, handNo:1 };
 /* 死牆（標準規則，2026-10-31 使用者拍板改標準）：牌牆尾端保留 16 張
    死牆（G.dead），一般摸牌只從活牆 G.wall 摸（pop＝活牆頭端），活牆
    摸完即流局、海底／河底以活牆為準；槓的補牌與花補牌改從牌牆尾端
@@ -1467,6 +1471,7 @@ function saveGame(){
       v:1, wall:G.wall, dead:(G.dead||[]), hand:G.hand, botHands:G.botHands, pools:G.pools,
       poolAll:G.poolAll, flowers:G.flowers, melds:G.melds, turn:G.turn, wins:G.wins,
       dances:G.dances, balances:G.balances, settings:SETTINGS,
+      dealer:G.dealer, renchan:G.renchan, roundWind:G.roundWind, roundStart:G.roundStart, handNo:G.handNo,
       phase:G.phase, call:callInfo
     });
     if(payload===lastSavedPayload) return; /* 狀態沒變：跳過雙寫＋讀回（dirty-skip，見 saveGame 上方註記） */
@@ -1517,6 +1522,11 @@ function restoreSavedGame(){
   /* 舊存檔可能留下負餘額（舊規則）：接回時一律夾到 0 以上，餘額不為負。 */
   [0,1,2,3].forEach(function(s){ var v=+G.balances[s]; G.balances[s]=(isFinite(v)&&v>0)?v:0; });
   G.drawnIdx=-1; G.ronTile=null; G.ronFrom=-1;
+  G.dealer=(typeof d.dealer==="number"&&d.dealer>=0&&d.dealer<=3)?d.dealer:3;
+  G.renchan=(typeof d.renchan==="number"&&d.renchan>=0)?d.renchan:0;
+  G.roundWind=(typeof d.roundWind==="number"&&d.roundWind>=1&&d.roundWind<=4)?d.roundWind:1;
+  G.roundStart=(typeof d.roundStart==="number"&&d.roundStart>=0&&d.roundStart<=3)?d.roundStart:3;
+  G.handNo=(typeof d.handNo==="number"&&d.handNo>=1)?d.handNo:1;
   $("ronBanner").classList.remove("show");
   $("winOverlay").classList.remove("show");
   sortHand(G.hand);
@@ -1661,6 +1671,11 @@ function updateStats(){
   $("statWins").textContent=G.wins;
   $("statDances").textContent=G.dances;
   $("wallInfo").textContent="🀄 牌牆剩 "+G.wall.length+" 張";
+  var sd=$("statDealer");
+  if(sd){
+    var dn=(G.dealer===3)?"你":CATS[G.dealer].name;
+    sd.textContent=WIND[G.roundWind||1]+"局・"+dn+"坐莊（東家）"+(G.renchan>0?"・連莊 "+G.renchan:"");
+  }
 }
 function renderFlowers(){
   /* 花牌顯示已改去副露區（2026-10-31 定版：花跟副露放一起、桌面上
@@ -1821,13 +1836,13 @@ function newGame(){
   $("ronBanner").classList.remove("show");
   $("winOverlay").classList.remove("show");
   stopCelebration();
-  if(window.__armWinVideo) window.__armWinVideo(); /* 開局就全量預載慶祝影片（定版改版，見 btnStart 註記）：整局時間把 lite3 載便，胡牌慶祝不再中途串流 */
+  if(window.__armWinVideo) window.__armWinVideo(); /* 開局就全量預載慶祝影片（定版改版，見 btnStart 註記）：整局時間把 lite4／lite5 載便，胡牌慶祝不再中途串流 */
   sortHand(G.hand);
   renderPools(); renderFlowers(); renderMelds(); updateStats(); updateBalancesUI();
   saveGame(); /* 發牌完成＝關鍵節點：立即強制存檔一次（寫入有讀回驗證） */
-  setStatus("新局開始！你坐莊，三隻貓已經就座，祝你開門紅喵 🐾");
+  setStatus("新局開始！"+(G.dealer===3?"你":CATS[G.dealer].name)+"坐莊"+(G.renchan>0?"（連莊 "+G.renchan+"）":"")+"，祝你開門紅喵 🐾");
   CATS.forEach(function(_,i){ catQuote(i); });
-  later(drawForPlayer, 650);
+  later(function(){ nextDraw(G.dealer); }, 650);
 }
 
 function drawForPlayer(){
@@ -2336,9 +2351,9 @@ function endDraw(){
 /* ===TAI=== 算台引擎（台灣十六張・貓貓屋簡化台表，說明面板有完整列表） ====
    analyzeWin(hand17, ctx) → {items:[[台名,台數]…], total, wildUsed}
    ctx = {seat:0..3, tsumo:bool, flowers:int, lastTile:bool}
-   座位風：你(3)=東（固定莊家）、Pop(0)=南、Maxwell(1)=西、CatJAM(2)=北；圈風恆為東。
+   座位風依莊家算：莊家=東、下家=南、對家=西、上家=北；圈風隨局推進（東南西北）。
    作法：列舉所有合法分解（組+將），逐一算台，取總台最高者。 */
-function seatWindIdx(seat){ return seat===3?27:(seat===0?28:(seat===1?29:30)); }
+function seatWindIdx(seat){ var ci=SEAT_CYCLE.indexOf(seat), di=SEAT_CYCLE.indexOf((typeof G!=="undefined" && typeof G.dealer==="number")?G.dealer:3); return 27+(((ci-di)%4+4)%4); }
 function decomposeAll(countsIn, wildIn){
   var results=[];
   function recMelds(counts, wild, melds){
@@ -2389,7 +2404,7 @@ function taiForDecomp(d, ctx){
     else if(m.kind==="trip"){
       allSeq=false;
       if(m.idx>=31) dragonTrips++;
-      else if(m.idx>=27){ hasHonor=true; if(m.idx===27) windTripCircle=true; if(m.idx===seatWindIdx(ctx.seat)) windTripSeat=true; }
+      else if(m.idx>=27){ hasHonor=true; if(m.idx===26+ctx.roundWind) windTripCircle=true; if(m.idx===seatWindIdx(ctx.seat)) windTripSeat=true; }
       else { suits[Math.floor(m.idx/9)]=1; hasSuit=true; }
       if(m.idx>=27) hasHonor=true;
     }
@@ -2399,10 +2414,10 @@ function taiForDecomp(d, ctx){
   if(pair>=27) hasHonor=true; else if(pair>=0) { hasSuit=true; suits[Math.floor(pair/9)]=1; }
   if(pair===-2) hasWildMeld=true;
   var suitCount=Object.keys(suits).length;
-  add("莊家", ctx.seat===3?1:0);
+  add("莊家", ctx.seat===ctx.dealer?1:0);
   add("自摸", ctx.tsumo?1:0);
   add("門清", ctx.menqing?1:0); /* 真規則：無吃／碰／明槓才算門清（暗槓不破門清） */
-  if(windTripCircle) add("圈風刻（東）", 1);
+  if(windTripCircle) add("圈風刻（"+WIND[ctx.roundWind]+"）", 1);
   if(windTripSeat) add("門風刻", 1);
   if(dragonTrips>0) add("三元刻 ×"+dragonTrips, dragonTrips);
   if(ctx.flowers>0) add("花牌 ×"+ctx.flowers, ctx.flowers);
@@ -2418,7 +2433,7 @@ function taiForDecomp(d, ctx){
   /* 平胡將牌（2026-10-31 放寬為標準）：將牌是值字才不給平胡——值字＝
      圈風（東，pair idx 27）／門風（贏家座位風）／三元（idx 31–33）；
      其他風牌（非值字風）作將照樣可平胡。 */
-  var pairIsValue = (pair===27) || (pair===seatWindIdx(ctx.seat)) || (pair>=31);
+  var pairIsValue = (pair===26+ctx.roundWind) || (pair===seatWindIdx(ctx.seat)) || (pair>=31);
   if(allSeq && melds.length===5 && pair>=0 && !pairIsValue) add("平胡", 1);
   return {items:items, total:total};
 }
@@ -2462,8 +2477,9 @@ function settleWin(winnerSeat, totalTai, payerSeat){
 /* ============ 胡牌慶祝主秀：跳舞影片（音畫分離定版） ============
    使用者定版（2026-10-30）：「不去背了，變的好卡」——移除整套即時
    chroma-key 管線，胡牌畫面直接播帶框的 Threads 完整版影片
-   assets/trio-dance-lite3.mp4（640×344／24fps／1.81MB／H.264 Main
-   +faststart、無音軌，2026-10-31 換檔治中段頓挫）；開局（開始手勢／
+   assets/trio-dance-lite4.mp4（640×344／24fps／GOP 固定 1 秒／碼率封頂／
+   +faststart、無音軌；2026-11-02 Version 03 重編治解碼尖峰；直向改播實體
+   預旋轉的 lite5（344×640）走 body 頂層 #winVideoTop、零 transform 祖先）；開局（開始手勢／
    newGame）就全量預載（__armWinVideo），整局備便、胡牌直接播。
    【音畫分離（2026-10-31，三次實機回報後定版）】舊架構跟 iOS 影片
    有聲 autoplay 硬碰（胡牌多由計時器觸發、不算手勢）：有聲 play 被
@@ -2479,7 +2495,7 @@ function settleWin(winnerSeat, totalTai, payerSeat){
    漂移校正；stage 關閉停歌。舊的靜音備援／節拍墊底／2.5 秒解靜音
    看門狗／有聲接手確認整套移除。備援：影片真失敗（error 事件）→
    重繪三隻 syncDance 靜圖舞，歌曲照樣由元素播放、不受影響。 */
-var winVideoEl=$("winVideo"), winVideoFailed=false, winVideoMode=false, winVideoPending=false, winVideoArmed=false;
+var winVideoEl=$("winVideo"), winVideoFailed=false, winVideoTopEl=$("winVideoTop"), winVideoTopFailed=false, curVidEl=null, pendingVidEl=null, winVideoMode=false, winVideoPending=false, winVideoArmed=false;
 /* 跳舞卡頓修復（2026-11-02，DD 定案／小弟實作／DD 校正）：video 元素在 init
    就永久搬進 #winStageSlot——iOS 搬動 media element 會使預載與解碼狀態失效，
    慶祝當下才搬正是開播頓挫來源之一；setWinVideoMode 不再搬進搬出。 */
@@ -2495,6 +2511,17 @@ if(winVideoEl){ var __stageSlot0=$("winStageSlot"); if(__stageSlot0 && winVideoE
    者定版：不要純黑實底）；BGM 本來就因 winOverlay 顯示而暫停（跳舞歌曲元素優先）。
    停止慶祝時全部還原：影片搬回 winBox 的 winVideoWrap、stage 隱藏、
    winBox 與 backdrop-filter 恢復。 */
+function activeWinVideo(){
+  if(document.body.classList.contains("rotated") && winVideoTopEl && !winVideoTopFailed) return winVideoTopEl;
+  return winVideoEl;
+}
+function positionWinVideoTop(){
+  if(!winVideoTopEl) return;
+  var slot=$("winStageSlot"); if(!slot) return;
+  var r=slot.getBoundingClientRect();
+  winVideoTopEl.style.left=r.left+"px"; winVideoTopEl.style.top=r.top+"px";
+  winVideoTopEl.style.width=r.width+"px"; winVideoTopEl.style.height=r.height+"px";
+}
 function setWinVideoMode(on){
   winVideoMode=on;
   var box=$("winBox"); if(box) box.classList.toggle("video-mode", on);
@@ -2525,9 +2552,11 @@ function setWinVideoMode(on){
       stage.setAttribute("aria-hidden","false");
     }
     document.body.classList.add("celebrating");
+    if(curVidEl && curVidEl===winVideoTopEl){ positionWinVideoTop(); winVideoTopEl.classList.add("show"); }
   } else {
     if(stage){ stage.classList.remove("show","has-detail"); stage.setAttribute("aria-hidden","true"); }
     document.body.classList.remove("celebrating");
+    if(winVideoTopEl) winVideoTopEl.classList.remove("show");
     /* video 永久駐留 stage slot，結束慶祝也不搬回 winBox（wrap 從此為空殼，
        .win-video-wrap 相關 CSS 僅餘空規則、無作用，保留不刪以利對照舊版） */
   }
@@ -2585,7 +2614,7 @@ function stopDanceSong(){
    歌曲該唱卻停了就續唱；不再有「點按解靜音」這回事（影片恆靜音）。 */
 function retryDanceMedia(){
   if(!winVideoMode) return;
-  if(winVideoEl && !winVideoFailed && winVideoEl.paused) tryPlayWinVideo();
+  var cv=curVidEl||winVideoEl; if(cv && cv.paused && !((cv===winVideoEl&&winVideoFailed)||(cv===winVideoTopEl&&winVideoTopFailed))) tryPlayWinVideo(cv);
   if(danceSongOn && danceAudioEl && danceAudioEl.paused){ try{ var p=danceAudioEl.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
 }
 /* 嘗試播放（音畫分離後）：影片永遠靜音——muted autoplay 不受手勢政策
@@ -2593,13 +2622,14 @@ function retryDanceMedia(){
    或使用者點擊重試，不落備援。currentTime 只在已有 metadata 時才歸
    零：舊版在 readyState 0 就 seek＋load，play() 常被打斷成 AbortError、
    連鎖把整場慶祝判死進備援（2026-10-31 實機主因之二）。 */
-function tryPlayWinVideo(){
-  if(!winVideoEl || winVideoFailed) return;
+function tryPlayWinVideo(el){
+  if(!el) el=winVideoEl;
+  if(!el || (el===winVideoEl && winVideoFailed) || (el===winVideoTopEl && winVideoTopFailed)) return;
   try{
-    winVideoEl.loop=true; /* 循環播放定版：影片只有 30.1 秒，stage 開著就一直重播，不停在最後一格 */
-    winVideoEl.muted=true; winVideoEl.defaultMuted=true;
-    if(winVideoEl.readyState>0){ try{ winVideoEl.currentTime=0; }catch(e){} }
-    var p=winVideoEl.play();
+    el.loop=true; /* 循環播放定版：影片只有 30.1 秒，stage 開著就一直重播，不停在最後一格 */
+    el.muted=true; el.defaultMuted=true;
+    if(el.readyState>0){ try{ el.currentTime=0; }catch(e){} }
+    var p=el.play();
     if(p && p.catch) p.catch(function(){ /* 留在 stage：等 canplay 再試或使用者點擊重試，不落備援 */ });
   }catch(e){ /* 同步例外也不落備援：stage 點擊可重試 */ }
 }
@@ -2607,120 +2637,185 @@ function tryPlayWinVideo(){
    切換成真影片（開 stage、靜音播放），不必等使用者做任何事。歌曲由
    專屬元素獨立播放，與影片載入進度無關。 */
 function promoteWinVideo(){
-  if(!winVideoPending || winVideoFailed || !winVideoEl) return;
+  if(!winVideoPending || !pendingVidEl) return;
+  if(pendingVidEl===winVideoEl && winVideoFailed) { pendingVidEl=null; winVideoPending=false; return; }
+  if(pendingVidEl===winVideoTopEl && winVideoTopFailed) { pendingVidEl=null; winVideoPending=false; return; }
   var ov=$("winOverlay");
-  if(!ov || !ov.classList.contains("show")){ winVideoPending=false; return; }
-  if(winVideoEl.readyState<3) return;
+  if(!ov || !ov.classList.contains("show")){ winVideoPending=false; pendingVidEl=null; return; }
+  if(pendingVidEl.readyState<3) return;
   winVideoPending=false;
+  var el=pendingVidEl;
+  pendingVidEl=null;
+  curVidEl=el;
   setWinVideoMode(true);
-  tryPlayWinVideo();
+  tryPlayWinVideo(el);
 }
 function startWinVideo(){
-  if(!winVideoEl || winVideoFailed){ applyWinFallback(); return; }
+  var el=activeWinVideo();
+  if(el===winVideoTopEl && winVideoTopFailed) el=winVideoEl;
+  if(!el){ applyWinFallback(); return; }
+  if(el===winVideoEl && winVideoFailed){ applyWinFallback(); return; }
+  curVidEl=el;
   if(window.__armWinVideo) window.__armWinVideo(); /* 胡牌當下再補一次全載觸發（冪等） */
-  if(winVideoEl.readyState>=3){
+  if(el.readyState>=3){
     /* 已載好：直接開 stage 播真影片（靜音） */
     winVideoPending=false;
     setWinVideoMode(true);
-    tryPlayWinVideo();
+    tryPlayWinVideo(el);
   } else {
     /* 還沒載好（例：胡牌前一刻才聽牌、自摸胡）：stage 先不開——
        備援三貓先在結算畫面頂著（歌曲照常由元素播放），影片 canplay
        一到 promoteWinVideo 自動切真影片；真的載入失敗（error）才由
        winVideoFallback 整場備援。 */
     winVideoPending=true;
-    if(winVideoEl.readyState===0){ try{ winVideoEl.load(); }catch(e){} }
+    pendingVidEl=el;
+    if(el.readyState===0){ try{ el.load(); }catch(e){} }
   }
 }
 function stopWinVideo(){
   winVideoPending=false;
+  pendingVidEl=null;
+  curVidEl=null;
   if(winVideoEl){ try{ winVideoEl.pause(); if(winVideoEl.readyState>0) winVideoEl.currentTime=0; }catch(e){} }
+  if(winVideoTopEl){ try{ winVideoTopEl.pause(); if(winVideoTopEl.readyState>0) winVideoTopEl.currentTime=0; }catch(e){} }
   setWinVideoMode(false);
 }
-if(winVideoEl){
-  /* 備援唯一真失敗入口：媒體 error 事件（檔案壞掉／格式不支援／
-     網路確定失敗）。stalled／waiting／play 被拒都不算失敗。 */
-  winVideoEl.addEventListener("error", function(){ winVideoFallback(); });
-  winVideoEl.addEventListener("canplay", function(){ promoteWinVideo(); });
-  winVideoEl.addEventListener("loadeddata", function(){ promoteWinVideo(); });
-  winVideoEl.addEventListener("click", function(){ retryDanceMedia(); });
-  /* stage 上任一次點按（點影片、點空白都算，但不攔截繼續／離開／補糧
-     按鈕的原本功能）→ 影片或歌曲沒在動就重試（retryDanceMedia）。 */
-  var winStageEl=$("winStage");
-  if(winStageEl) winStageEl.addEventListener("pointerdown", function(){ retryDanceMedia(); });
-  /* 循環保底：loop 屬性在部分 webview 把節點搬進 stage 後失效——播到
-     結尾（ended）時若慶祝還開著就自己從頭重播，永不停在凍結畫面。 */
-  winVideoEl.addEventListener("ended", function(){
-    if(!winVideoMode || winVideoFailed) return;
-    try{ winVideoEl.currentTime=0; var p=winVideoEl.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
-  });
-  /* 每次真的播起來都重申 loop（元素被搬進 stage 後的保底） */
-  winVideoEl.addEventListener("playing", function(){
-    try{ winVideoEl.loop=true; }catch(e){}
-  });
-  /* 音畫同步守護（2026-11-02 重做，取代舊 timeupdate 校正）：舊版校正掛在
-     影片 timeupdate 上——影片卡住時不觸發、恢復後硬 seek 跳針，且不計 loop
-     圈數，漂移逐圈累積（使用者實機回報「音樂到後面對不上」）。新版：
-     (1) 雙邊 timeupdate 只做圈數偵測（currentTime 倒退 >0.5s 記一圈）；
-     (2) syncCheck 由獨立 400ms 計時器驅動（startCelebration 起、stop 停），
-     以「圈數×片長＋currentTime」的有效時間比對，誤差 >0.45s 只 seek 音訊
-     （定版不變：永不 seek 影片），目標值以歌曲片長取模正規化，單次圈數
-     誤判會被取模自動抵消；(3) 影片 waiting/stalled 時歌曲跟著停，
-     playing 恢復時先 syncCheck 對齊再續播，卡頓期間不累積漂移。 */
-  var syncTimer=null, vidLoops=0, audLoops=0, lastVidT=-1, lastAudT=-1, songStalled=false;
-  var syncCheck=function(){
-    if(!winVideoMode || !danceSongOn || !danceAudioEl || !winVideoEl) return;
-    var vidDur=winVideoEl.duration, audDur=danceAudioEl.duration;
-    if(!(vidDur>0) || !(audDur>0)) return;
-    var effV=vidLoops*vidDur+winVideoEl.currentTime;
-    var effA=audLoops*audDur+danceAudioEl.currentTime;
-    var diff=effA-effV;
-    if(Math.abs(diff)>0.45){
-      var norm=effV%audDur; if(norm<0) norm+=audDur;
-      try{ danceAudioEl.currentTime=norm; }catch(e){}
+/* 雙播放器事件接線（2026-11-02 Version 03）：#winVideo（橫向 lite4，駐留
+   stage slot）與 #winVideoTop（直向 lite5 實體預旋轉、body 頂層）共用同一
+   套 handler；只有「當前元素」curVidEl 的事件能影響歌曲與同步守護。 */
+function wireWinVideo(el){
+  /* 備援唯一真失敗入口：媒體 error 事件（檔案壞掉／格式不支援／網路確定
+     失敗）。stalled／waiting／play 被拒都不算失敗。 */
+  el.addEventListener("error", function(){
+    if(el===winVideoTopEl){
+      /* lite5 真失敗：標記後若正播它，先試切回橫向元素；橫向也不可用才整場備援 */
+      winVideoTopFailed=true;
+      if(curVidEl===el){
+        if(winVideoEl && !winVideoFailed){
+          curVidEl=winVideoEl;
+          winVideoTopEl.classList.remove("show");
+          tryPlayWinVideo(winVideoEl);
+        } else {
+          winVideoPending=false; pendingVidEl=null;
+          applyWinFallback();
+        }
+      }
+      return;
     }
-  };
-  winVideoEl.addEventListener("timeupdate", function(){
-    try{
-      var t=winVideoEl.currentTime;
-      if(lastVidT>=0 && t<lastVidT-0.5) vidLoops++;
-      lastVidT=t;
-    }catch(e){}
+    winVideoFallback();
   });
-  if(danceAudioEl) danceAudioEl.addEventListener("timeupdate", function(){
-    try{
-      var t=danceAudioEl.currentTime;
-      if(lastAudT>=0 && t<lastAudT-0.5) audLoops++;
-      lastAudT=t;
-    }catch(e){}
+  el.addEventListener("canplay", promoteWinVideo);
+  el.addEventListener("loadeddata", promoteWinVideo);
+  /* stage 期間點影片＝嘗試恢復播放（與點 stage 背景同路） */
+  el.addEventListener("click", retryDanceMedia);
+  /* 循環保底：loop 屬性失效時（ended）若慶祝還開著就自己從頭重播，
+     永不停在凍結畫面（僅當前元素） */
+  el.addEventListener("ended", function(){
+    if(!winVideoMode || el!==curVidEl) return;
+    if(el===winVideoEl && winVideoFailed) return;
+    if(el===winVideoTopEl && winVideoTopFailed) return;
+    try{ el.currentTime=0; var p=el.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
   });
-  var __songStall=function(){
-    if(danceSongOn && danceAudioEl && !danceAudioEl.paused){ try{ danceAudioEl.pause(); }catch(e){} songStalled=true; }
-  };
-  winVideoEl.addEventListener("waiting", __songStall);
-  winVideoEl.addEventListener("stalled", __songStall);
-  winVideoEl.addEventListener("playing", function(){
+  el.addEventListener("playing", function(){
+    try{ el.loop=true; }catch(e){}
+    if(el!==curVidEl) return;
+    /* 影片恢復播放（卡頓結束）→ 先校時再續播歌曲，避免頓挫期漂移被帶著跑 */
     if(songStalled){
       songStalled=false;
       syncCheck();
       if(danceSongOn && danceAudioEl && danceAudioEl.paused){ try{ var p=danceAudioEl.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
     }
   });
-  /* 頁面載入時只預抓 metadata（幾 KB）；全量預載改在開局觸發
-     （__armWinVideo：btnStart 手勢／newGame 呼叫，maybeArmWinVideo
-     的聽牌觸發保留為冪等備援）。__preloadWinVideo 已 arm 時不降級。 */
-  window.__preloadWinVideo=function(){
-    try{ if(winVideoEl && !winVideoFailed && !winVideoArmed && winVideoEl.readyState===0){ winVideoEl.preload="metadata"; winVideoEl.load(); } }catch(e){}
-  };
-  window.__armWinVideo=function(){
-    try{
-      if(!winVideoEl || winVideoFailed || winVideoArmed) return;
-      winVideoArmed=true;
-      winVideoEl.preload="auto"; winVideoEl.load();
-      if(danceAudioEl && danceAudioEl.readyState===0){ danceAudioEl.preload="auto"; danceAudioEl.load(); } /* 歌曲元素同在 arm 時機備好，胡牌當下直接唱 */
-    }catch(e){}
-  };
+  /* 影片 loop 圈數偵測（僅當前元素）：currentTime 倒退 >0.5s 記一圈 */
+  el.addEventListener("timeupdate", function(){
+    if(el!==curVidEl) return;
+    try{ var t=el.currentTime; if(lastVidT>=0 && t<lastVidT-0.5) vidLoops++; lastVidT=t; }catch(e){}
+  });
+  /* 影片卡住（waiting/stalled）→ 歌曲先暫停等它（僅當前元素）；恢復走 playing */
+  el.addEventListener("waiting", function(){ if(el===curVidEl) __songStall(); });
+  el.addEventListener("stalled", function(){ if(el===curVidEl) __songStall(); });
 }
+if(winVideoEl) wireWinVideo(winVideoEl);
+if(winVideoTopEl) wireWinVideo(winVideoTopEl);
+/* stage 上任一次點按（點影片、點空白都算，但不攔截繼續／離開／補糧按鈕
+   的原本功能）→ 影片或歌曲沒在動就重試（retryDanceMedia）。 */
+var __stageEl=$("winStage");
+if(__stageEl) __stageEl.addEventListener("pointerdown", function(){ retryDanceMedia(); });
+/* 音畫同步守護（2026-11-02 重做，取代舊 timeupdate 校正）：舊版校正掛在
+   影片 timeupdate 上——影片卡住時不觸發、恢復後硬 seek 跳針，且不計 loop
+   圈數，漂移逐圈累積（使用者實機回報「音樂到後面對不上」）。新版：
+   (1) 雙邊 timeupdate 只做圈數偵測（currentTime 倒退 >0.5s 記一圈）；
+   (2) syncCheck 由獨立 400ms 計時器驅動（startCelebration 起、stop 停），
+   以「圈數×片長＋currentTime」的有效時間比對，誤差 >0.45s 只 seek 音訊
+   （定版不變：永不 seek 影片），目標值以歌曲片長取模正規化，單次圈數
+   誤判會被取模自動抵消；(3) 影片 waiting/stalled 時歌曲跟著停，
+   playing 恢復時先 syncCheck 對齊再續播，卡頓期間不累積漂移。
+   Version 03 起比對對象改為 curVidEl（當前播放元素）。 */
+var syncTimer=null, vidLoops=0, audLoops=0, lastVidT=-1, lastAudT=-1, songStalled=false;
+function syncCheck(){
+  if(!winVideoMode || !danceSongOn || !danceAudioEl || !curVidEl) return;
+  var vidDur=curVidEl.duration, audDur=danceAudioEl.duration;
+  if(!(vidDur>0) || !(audDur>0)) return;
+  var effV=vidLoops*vidDur+curVidEl.currentTime;
+  var effA=audLoops*audDur+danceAudioEl.currentTime;
+  var diff=effA-effV;
+  if(Math.abs(diff)>0.45){
+    var norm=effV%audDur; if(norm<0) norm+=audDur;
+    try{ danceAudioEl.currentTime=norm; }catch(e){}
+  }
+}
+if(danceAudioEl) danceAudioEl.addEventListener("timeupdate", function(){
+  try{
+    var t=danceAudioEl.currentTime;
+    if(lastAudT>=0 && t<lastAudT-0.5) audLoops++;
+    lastAudT=t;
+  }catch(e){}
+});
+function __songStall(){
+  if(danceSongOn && danceAudioEl && !danceAudioEl.paused){ try{ danceAudioEl.pause(); }catch(e){} songStalled=true; }
+}
+/* 頁面載入時只預抓 metadata（幾 KB）；全量預載改在開局觸發
+   （__armWinVideo：btnStart 手勢／newGame 呼叫，maybeArmWinVideo
+   的聽牌觸發保留為冪等備援）。__preloadWinVideo 已 arm 時不降級。
+   Version 03 起兩支影片（lite4／lite5）一起預熱。 */
+window.__preloadWinVideo=function(){
+  try{
+    if(winVideoEl && !winVideoFailed && !winVideoArmed && winVideoEl.readyState===0){ winVideoEl.preload="metadata"; winVideoEl.load(); }
+    if(winVideoTopEl && !winVideoTopFailed && !winVideoArmed && winVideoTopEl.readyState===0){ winVideoTopEl.preload="metadata"; winVideoTopEl.load(); }
+  }catch(e){}
+};
+window.__armWinVideo=function(){
+  try{
+    if(!winVideoEl || winVideoFailed || winVideoArmed) return;
+    winVideoArmed=true;
+    winVideoEl.preload="auto"; winVideoEl.load();
+    if(winVideoTopEl && !winVideoTopFailed){ winVideoTopEl.preload="auto"; winVideoTopEl.load(); }
+    if(danceAudioEl && danceAudioEl.readyState===0){ danceAudioEl.preload="auto"; danceAudioEl.load(); } /* 歌曲元素同在 arm 時機備好，胡牌當下直接唱 */
+  }catch(e){}
+};
+
+/* 慶祝中途旋轉／改尺寸：直向↔橫向要換播另一支預旋轉檔（零 transform
+   祖先定版）；同方向只換尺寸時把頂層播放器重新對位 slot。120ms 去抖。 */
+var __rotSwapTimer=null;
+function __winResizeWatch(){
+  if(!winVideoMode) return;
+  var want=activeWinVideo();
+  if(want && curVidEl && want!==curVidEl){
+    var t=0; try{ t=curVidEl.currentTime||0; }catch(e){}
+    try{ curVidEl.pause(); }catch(e){}
+    if(winVideoTopEl) winVideoTopEl.classList.remove("show");
+    curVidEl=want;
+    vidLoops=0; lastVidT=-1;
+    if(curVidEl===winVideoTopEl){ positionWinVideoTop(); winVideoTopEl.classList.add("show"); }
+    try{ if(curVidEl.readyState>0) curVidEl.currentTime=t; }catch(e){}
+    tryPlayWinVideo(curVidEl);
+    try{ curVidEl.currentTime=t; }catch(e){} /* tryPlay 會歸零，這裡在播放後補回進度 */
+  } else if(curVidEl && curVidEl===winVideoTopEl){
+    positionWinVideoTop();
+  }
+}
+window.addEventListener("resize", function(){ if(__rotSwapTimer) clearTimeout(__rotSwapTimer); __rotSwapTimer=setTimeout(__winResizeWatch, 120); });
+window.addEventListener("orientationchange", function(){ if(__rotSwapTimer) clearTimeout(__rotSwapTimer); __rotSwapTimer=setTimeout(__winResizeWatch, 120); });
 
 /* 慶祝總開關：直接播完整版影片（失敗自動走重繪備援）；stopCelebration 全停 */
 function startCelebration(){
@@ -2753,6 +2848,29 @@ function spawnConfetti(box){
 }
 /* 胡牌結算畫面（玩家/貓胡牌共用）：標題 +（玩家胡/流局才有的）完整版跳舞影片 + 算台明細 + 貓糧結算 + 繼續/離開（說明文已全數移除，使用者定版）
    res = {winnerSeat, how:'zimo'|'ron'|'draw', payerSeat, hand17, flowers, lastTile} */
+/* 照規局輪莊（2026-11-02 Version 03）：莊家胡牌連莊；流局時莊家有聽牌
+   也連莊，沒聽則換下家。換莊繞回本圈起莊者（roundStart）時推進圈風
+   （東→南→西→北）。handNo 每局 +1。 */
+function advanceDealerAfterHand(winnerSeat, dealerTenpai){
+  if(typeof G.dealer!=="number") G.dealer=3;
+  if(typeof G.renchan!=="number") G.renchan=0;
+  if(typeof G.roundWind!=="number") G.roundWind=1;
+  if(typeof G.roundStart!=="number") G.roundStart=3;
+  if(typeof G.handNo!=="number") G.handNo=1;
+  var isDealerWin=(typeof winnerSeat==="number" && winnerSeat===G.dealer);
+  var isDraw=(winnerSeat===null);
+  if(isDealerWin || (isDraw && dealerTenpai)){
+    G.renchan++;
+  } else {
+    G.renchan=0;
+    G.dealer=nextSeat(G.dealer);
+    if(G.dealer===G.roundStart){
+      G.roundWind=(G.roundWind%4)+1;
+      G.roundStart=G.dealer;
+    }
+  }
+  G.handNo++;
+}
 function showWinResult(res){
   var ov=$("winOverlay"), box=$("winBox");
   box.querySelectorAll(".confetti").forEach(function(e){e.remove();});
@@ -2769,7 +2887,7 @@ function showWinResult(res){
   } else {
     var tai=analyzeWin(res.hand17, { seat:res.winnerSeat, tsumo:(res.how==="zimo"),
       flowers:fl.length, lastTile:!!res.lastTile, melds:(res.melds||[]),
-      menqing:(res.melds||[]).every(function(m){ return m.concealed; }) });
+      menqing:(res.melds||[]).every(function(m){ return m.concealed; }), dealer:(typeof G.dealer==="number"?G.dealer:3), roundWind:(typeof G.roundWind==="number"?G.roundWind:1) });
     var st=settleWin(res.winnerSeat, tai.total, res.how==="ron"?res.payerSeat:-1);
     if(winnerIsPlayer){
       G.wins++; G.dances++;
@@ -2807,6 +2925,11 @@ function showWinResult(res){
   if(isDraw || winnerIsPlayer) startCelebration();
   updateStats(); updateBalancesUI();
   refreshRefillBtn(); /* 有人歸零才顯示補糧鈕，否則維持隱藏 */
+  /* 照規局輪莊：結算完成後推進莊家（莊家胡／流局聽牌連莊，否則換下家），
+     再刷一次頂欄，讓「下一局莊家」即時顯示正確。 */
+  var dealerTenpai=(isDraw && typeof waitingTilesFor==="function") ? (waitingTilesFor(G.dealer).length>0) : false;
+  advanceDealerAfterHand(isDraw?null:res.winnerSeat, dealerTenpai);
+  updateStats();
 }
 function showWinDraw(){
   showWinResult({ winnerSeat:null, how:"draw", payerSeat:-1, hand17:null, flowers:G.flowers[3].slice(), lastTile:false });
@@ -4131,6 +4254,7 @@ if(window.__hasPreSave){
     if(window.__armWinVideo) window.__armWinVideo(); /* 開局就全量預載跳舞影片（定版改版）：不再等聽牌才載——中途才載是胡牌慶祝中段頓挫的來源之一，開局手勢後立刻全載、整局時間備便 */
     sessionSaveIsAuto=false; /* 使用者真的開局了：之後的存檔是真對局，回開始畫面要給接回鈕 */
     if(typeof clearSave==="function") clearSave("start-click"); /* 明確按開始＝新對局，舊存檔作廢 */
+    if(typeof G!=="undefined"){ G.dealer=3; G.renchan=0; G.roundWind=1; G.roundStart=3; G.handNo=1; } /* 新對局：輪莊狀態重置（東局、你先坐莊） */
     refreshResumeBtn(); /* 存檔已清：接回鈕同步收起，下次回開始畫面不會看到殘鈕 */
     if(ss) ss.classList.add("hide");
     if(typeof newGame==="function") newGame();
