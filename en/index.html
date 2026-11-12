@@ -140,8 +140,6 @@ body.flat .discard-summary{display:none}
 .pool.merged{grid-column:1 / -1}
 .pool.merged .tiles{max-width:none} /* 全部棄牌都顯示：不截斷、自動換列 */
 .pool.merged .tile.mini{width:46px;height:64px;font-size:16px}
-.pool.merged .tile.mini .dot{width:10px;height:10px;border-width:3px}
-.pool.merged .tile.mini .bamboo{width:7.5px;height:17px}
 .pool.merged .tile.mini .honor-char{font-size:1.55em}
 @media(max-width:560px){
   .pool.merged .tiles{max-width:none}
@@ -150,16 +148,12 @@ body.flat .discard-summary{display:none}
 .pool .tile.mini{width:41px;height:57px;font-size:14.5px;border-radius:7px;box-shadow:inset 0 1px 0 #fff,inset 0 -3px 0 rgba(150,120,70,.14),0 1px 1px rgba(60,45,20,.18),0 3px 0 #bfae87,0 4px 0 #a08c66,0 7px 10px rgba(30,25,15,.3)}
 /* 誰打的：磚角座位色點（平面版） */
 .pool .tile.mini .seat-dot{position:absolute;top:3px;right:3px;width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(30,25,15,.35);z-index:2}
-.pool .tile.mini .dot{width:8.5px;height:8.5px;border-width:2.5px}
-.pool .tile.mini .bamboo{width:6.5px;height:15px}
 .pool .tile.mini .honor-char{font-size:1.5em}
 
 /* ---------- tiles ---------- */
 .tile{position:relative;background:linear-gradient(180deg,#ffffff 0%,var(--tile) 58%,#efe6d2 100%);border:1px solid var(--tile-edge);border-radius:8px;color:#2a2620;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;user-select:none;
   box-shadow:inset 0 1px 0 #fff,inset 0 -3px 0 rgba(150,120,70,.12),inset 1px 0 0 rgba(255,255,255,.6),0 1px 1px rgba(60,45,20,.18),0 3px 0 #cdbd97,0 4px 0 #b3a078,0 9px 13px rgba(30,25,15,.22)}
 .tile.mini{width:31px;height:43px;font-size:11px;border-radius:6px;flex:none;box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(60,45,20,.15),0 2px 0 #cdbd97,0 3px 0 #b3a078,0 5px 7px rgba(30,25,15,.2)}
-.tile.mini .dots{gap:1.5px}.tile.mini .dot{width:6px;height:6px}
-.tile.mini .bamboos{gap:1.5px}.tile.mini .bamboo{width:4.5px;height:11px}
 .tile .wan-num{font-family:"Baloo 2",sans-serif;font-size:.62em;line-height:1;color:#0d3f9e}
 .tile .wan-char{font-size:1.05em;line-height:1.05;color:var(--red)}
 .honor-char{font-size:1.45em;line-height:1.1}
@@ -169,16 +163,19 @@ body.flat .discard-summary{display:none}
 .honor-char.bai{color:#1447b8;border:2.5px solid #1447b8;border-radius:4px;padding:.02em .14em;font-size:1.15em;background:rgba(20,71,184,.08)}
 .tile.mini .honor-char{font-size:1.25em}
 .tile.mini .honor-char.bai{font-size:1em;border-width:2px}
-.tile.flower-tile{background:linear-gradient(180deg,#fdf8f4,#f3e3da 80%,#e8cfc0);border-color:#cdb09e}
+.tile.flower-tile{background:#ffdce6;border-color:#e3a8bf}
 .flower-icon{font-size:.78em;line-height:1}
 .flower-char{font-size:1.05em;line-height:1.1;color:#8e2453}
-.dots{display:grid;gap:2.5px;justify-items:center;align-items:center}
-.dot{width:9px;height:9px;border-radius:50%;border:2px solid #1447c8;background:radial-gradient(circle at 50% 50%, #e02318 0 32%, #fff 34% 52%, #1447c8 54%)}
-.dot.g{border-color:#0d8a3a;background:radial-gradient(circle at 50% 50%, #0d8a3a 0 34%, #fff 36% 54%, #0d8a3a 56%)}
-.dot.r{border-color:#c2160d;background:radial-gradient(circle at 50% 50%, #e9d18c 0 30%, #e02318 34%)}
-.bamboos{display:grid;gap:2.5px;justify-items:center;align-items:center}
-.bamboo{width:6.5px;height:15px;border-radius:4px;background:repeating-linear-gradient(180deg,#0fa34a 0 4px,#0b6e2f 4px 5.5px,#2fbf5f 5.5px 9px,#0b6e2f 9px 10.5px,#0fa34a 10.5px 15px);border:1px solid #075126}
-.bamboo.red{background:repeating-linear-gradient(180deg,#e02318 0 4px,#a3120a 4px 5.5px,#f0563f 5.5px 9px,#a3120a 9px 10.5px,#e02318 10.5px 15px);border-color:#7d0f06}
+.pips{position:absolute;inset:5% 6%;pointer-events:none}
+.pip{position:absolute;transform:translate(-50%,-50%)}
+.pip.dot{width:36%;aspect-ratio:1/1;border-radius:50%}
+.pip.dot.b{background:radial-gradient(circle closest-side,#1447c8 0 41%,#fff 42% 54%,#1447c8 55% 100%)}
+.pip.dot.g{background:radial-gradient(circle closest-side,#0d8a3a 0 41%,#fff 42% 54%,#0d8a3a 55% 100%)}
+.pip.dot.r{background:radial-gradient(circle closest-side,#e02318 0 41%,#fff 42% 54%,#e02318 55% 100%)}
+.pip.bam{width:17%;height:29%;border-radius:3px;background:linear-gradient(180deg,#0fa34a 0 44%,rgba(0,0,0,.34) 44% 56%,#0fa34a 56% 100%)}
+.pip.bam.red{background:linear-gradient(180deg,#e02318 0 44%,rgba(0,0,0,.34) 44% 56%,#e02318 56% 100%)}
+.bamboo-one{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:21%;height:73%;background:#0d8a3a;border-radius:6px}
+.bamboo-one i{position:absolute;left:50%;top:26%;transform:translateX(-50%);width:53%;height:52%;background:#e02318;border-radius:4px}
 
 /* ---------- player rack ---------- */
 .player{margin-top:18px;background:var(--panel);backdrop-filter:blur(14px) saturate(1.05);-webkit-backdrop-filter:blur(14px) saturate(1.05);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow-md)}
@@ -195,8 +192,6 @@ body.flat .discard-summary{display:none}
 .hand{display:flex;gap:5px;align-items:flex-end;justify-content:flex-end;--htw:calc((min(1080px,100vw - 16px) - 140px)/17)}
 body.flat .hand{transform:none}
 .hand .tile{flex:0 1 auto;width:min(var(--htw),calc((100% - 80px)/17));min-width:30px;height:clamp(62px,9.5vw,86px);font-size:clamp(15px,2.6vw,22px);padding:2px 0} /* 牌寬加容器上限＋flex 可縮：副露專區變寬時手牌等比微縮塞進牌架剩餘寬度、永不溢出壓專區（雙槓遮牌修法，見 .play-row 註記）；舊版 flex:none 在橫屏／旋轉覆寫裡把這個上限蓋掉，是溢出的共犯 */
-.hand .tile .dot{width:clamp(5px,1.3vw,9px);height:clamp(5px,1.3vw,9px)}
-.hand .tile .bamboo{width:clamp(4px,1vw,6.5px);height:clamp(9px,2vw,15px)}
 @media(max-width:620px){
   .hand{flex-wrap:wrap;transform:none;justify-content:flex-start}
   .hand .tile{flex:0 0 calc((100% - 40px)/9);width:auto;height:64px;font-size:15px}
@@ -1283,17 +1278,18 @@ function shapeScore(hand){
 }
 
 /* ============ 牌面繪製 ============ */
+var PIP_POS={tl:[18.75,15],tc:[50,15],tr:[81.25,15],ml:[18.75,50],mc:[50,50],mr:[81.25,50],bl:[18.75,85],bc:[50,85],br:[81.25,85]};
+var PIP_LAYOUT={1:["mc"],2:["tl","br"],3:["tl","mc","br"],4:["tl","tr","bl","br"],5:["tl","tr","mc","bl","br"],6:["tl","tr","ml","mr","bl","br"],7:["tl","tc","tr","ml","mr","bl","br"],8:["tl","tc","tr","ml","mr","bl","bc","br"],9:["tl","tc","tr","ml","mc","mr","bl","bc","br"]};
 function dotsHTML(n){
-  var cols = n<=3?1:(n===4?2:(n<=6?2:3));
   var cls=["b","g","r"];
-  var h='<div class="dots" style="grid-template-columns:repeat('+cols+',auto)">';
-  for(var i=0;i<n;i++){ var c = n===1?"r":cls[i%3]; h+='<span class="dot '+(c==="b"?"":c)+'"></span>'; }
+  var h='<div class="pips">';
+  PIP_LAYOUT[n].forEach(function(k,i){ var p=PIP_POS[k]; var c=n===1?"r":cls[i%3]; h+='<span class="pip dot '+c+'" style="left:'+p[0]+'%;top:'+p[1]+'%"></span>'; });
   return h+"</div>";
 }
 function bambooHTML(n){
-  var cols = n<=3?1:(n===4?2:(n<=6?2:3));
-  var h='<div class="bamboos" style="grid-template-columns:repeat('+cols+',auto)">';
-  for(var i=0;i<n;i++){ h+='<span class="bamboo'+(n===1||i===Math.floor(n/2)&&n%2===1?" red":"")+'"></span>'; }
+  if(n===1) return '<div class="pips"><div class="bamboo-one"><i></i></div></div>';
+  var h='<div class="pips">';
+  PIP_LAYOUT[n].forEach(function(k,i){ var p=PIP_POS[k]; var red=(i===Math.floor(n/2)&&n%2===1); h+='<span class="pip bam'+(red?" red":"")+'" style="left:'+p[0]+'%;top:'+p[1]+'%"></span>'; });
   return h+"</div>";
 }
 function tileInner(t){
