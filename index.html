@@ -206,6 +206,9 @@ button.tile.drawn{outline:2px solid var(--teal);outline-offset:2px;transform:tra
 .hu-btn.show{display:inline-block}
 @keyframes huPulse{from{transform:scale(1)}to{transform:scale(1.045)}}
 .hint-text{font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:.02em}
+#tingBar{display:none;margin:0 0 6px;padding:6px 12px;border-radius:999px;background:#fdf3d8;border:1px solid #e3cf8f;color:#6d5716;font-size:13.5px;font-weight:700;letter-spacing:.02em;text-align:center}
+#tingBar.show{display:block}
+#tingBar .ting-tile{color:#a33c1f}
 
 /* ---------- ron banner ---------- */
 .ron-banner{display:none;background:linear-gradient(180deg,#fbf6e9,#f3ead2);border:1px solid var(--hair);color:#4a3a16;border-radius:14px;padding:13px 15px;margin-top:14px;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700;letter-spacing:.02em;box-shadow:var(--shadow-md)}
@@ -867,6 +870,7 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;visi
       <button class="btn toggle-on" id="btnSfx" type="button" aria-pressed="true">🔊 音效：開</button>
       <button class="btn" id="btnInfo" type="button">📖 說明・圖鑑</button>
       <button class="btn toggle-on" id="btnBgm" type="button" aria-pressed="true">🎵 音樂：開</button>
+      <button class="btn toggle-on" id="btnTing" type="button" aria-pressed="true">👂 聽牌提示：開</button>
       <button class="btn" id="btnHome" type="button">🏠 開始畫面（改貓糧賭注）</button>
     </div>
     <div class="stats">
@@ -957,6 +961,7 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;visi
          副露增減不擠壓手牌；沒有副露時角落整組隱藏。 -->
     <span id="statusMsg" role="status" style="display:none">按下「開新局」開始跟貓貓們打牌！</span>
     <span id="wallInfo" style="display:none">🀄 牌牆：–</span>
+    <div id="tingBar" role="status"></div>
     <div class="play-row">
       <div class="melds-row melds-corner" id="meldsCorner" style="display:none"><span id="myMelds"></span></div>
       <div class="rack"><div class="hand" id="hand"></div></div>
@@ -995,8 +1000,8 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;visi
       <li><b>吃・碰・槓（跟真麻將一樣）：</b>別人打出的牌若能湊組，畫面會跳出橫幅讓你選——<b>碰</b>（手上有 2 張一樣）、<b>槓</b>（3 張一樣，槓完從牌牆補摸 1 張）、<b>吃</b>（只能吃<b>上家</b>打的牌，湊同門順子），不想叫就按「過」。自己摸牌時若湊滿 4 張一樣可<b>暗槓</b>、碰過的牌再摸到第 4 張可<b>加槓</b>（按鈕會出現在手牌旁；加槓會被別人<b>搶槓</b>胡牌，暗槓不會）。叫牌優先序跟真麻將一樣：<b>胡 ＞ 碰／槓 ＞ 吃</b>。三隻貓也會自己吃碰槓，叫到的組會亮在各自的副露區；有副露後手牌變少是正常的（副露的組已湊好、不算在手牌裡）。</li>
       <li><b>背景音樂 BGM：</b>對局全程小小聲墊底播放的是<b>自製鋼琴編曲・慢柔版（長版）</b>（3 分 54 秒無縫循環）：主旋律照 Piano Tutorial 慢速段<b>逐鍵抄寫</b>還原 Spencer &amp; Hill《Cool》的主 riff（來源：YouTube rBfxV_lJPfk Yellow Notes Piano Tutorial 0:59 起慢速段，0.25x＋原慢速兩遍核對；其中一處 E 重複次數不確定，2–3 次之間先用 2 次），再自行編曲成長版（前奏→主題→低音域→主題+和聲→間奏→高音域→主題→尾奏）以鋼琴音色渲染。<b>誠實標示：這是自製鋼琴編曲，不是真人演奏錄音，也沒有使用《Cool》原曲音檔。</b>音量刻意壓到若有似無（音檔本身已整檔大幅壓低燒製，因為手機瀏覽器不吃播放器的音量設定、直接改檔案最實在）只做背景襯底，不會蓋過打牌音效；第一次點畫面／按鍵互動後才開始播（瀏覽器規定）；在右上角「⚙️ 設定」選單裡的「音樂：開／關」可獨立控制。胡牌慶祝畫面出現時 BGM 自動暫停，讓跳舞歌曲優先，關掉慶祝畫面後以小音量自動回來。</li>
       <li><b>打牌音效（聽聲辨位）：</b>每家打牌都有自己的招牌 meme 音——你（Huh 貓）是上揚的「Huh?」、Pop Cat 是嘴巴「啵」、Maxwell 是低沉悶哼、CatJAM 是跟節拍點頭的小 beat，底下還疊一聲麻將牌敲桌的喀聲；摸牌也有輕敲聲。全部是 WebAudio 即時合成的致敬音效（沒有盜用任何音檔），在右上角「⚙️ 設定」選單裡的「音效：開／關」可切換。</li>
-      <li><b>自摸與放槍：</b>自己摸到胡牌張按「自摸胡牌」；貓打出的牌剛好是你等的牌，就是貓<b>放槍</b>了，跳出「胡！」按鈕點下去就胡（按「過」就放掉）。只差一張就胡叫做<b>聽牌</b>，聽哪些張靠自己判斷（畫面不提示）。</li>
-      <li><b>小幫手：</b>開局四家（含你）都是洗牌後隨機發 16 張，沒有預先湊好的牌；手牌會<b>自動理牌</b>（摸牌、打牌後自動排序，剛摸到的牌會短暫亮框標出），不用自己整理、也沒有提示功能——靠自己的牌感打。<b>死牆（標準規則）：</b>牌牆尾端保留 16 張死牆不摸，活牆摸完沒胡就是<b>流局</b>；槓的補牌與補花都從牌牆尾端的<b>嶺上</b>取，海底撈月／河底撈魚也以活牆摸完為準。再戰一局就好。</li>
+      <li><b>自摸與放槍：</b>自己摸到胡牌張按「自摸胡牌」；貓打出的牌剛好是你等的牌，就是貓<b>放槍</b>了，跳出「胡！」按鈕點下去就胡（按「過」就放掉）。只差一張就胡叫做<b>聽牌</b>；聽牌時手牌上方會跳出提示條，列出你聽的牌與各自剩餘張數（只算檯面上看得到的牌：你的手牌、四家副露與棄牌池；不想被提示可在右上角「⚙️ 設定」選單關掉「聽牌提示」）。</li>
+      <li><b>小幫手：</b>開局四家（含你）都是洗牌後隨機發 16 張，沒有預先湊好的牌；手牌會<b>自動理牌</b>（摸牌、打牌後自動排序，剛摸到的牌會短暫亮框標出），不用自己整理；唯一的提示是可開關的聽牌提示條，其餘靠自己的牌感打。<b>死牆（標準規則）：</b>牌牆尾端保留 16 張死牆不摸，活牆摸完沒胡就是<b>流局</b>；槓的補牌與補花都從牌牆尾端的<b>嶺上</b>取，海底撈月／河底撈魚也以活牆摸完為準。再戰一局就好。</li>
     </ul>
   </details>
 
@@ -1672,7 +1677,57 @@ function updateStats(){
     var dn=(G.dealer===3)?"你":CATS[G.dealer].name;
     sd.textContent=WIND[G.roundWind||1]+"局・"+dn+"坐莊（東家）"+(G.renchan>0?"・連莊 "+G.renchan:"");
   }
+  try{ updateTingBar(); }catch(e){}
 }
+/* ============ 聽牌提示（2026-11-12 改進首批①）============
+   玩家手牌進入聽牌（暗牌張數＝need*3+1 且 waitingTilesFor 有結果）時，
+   在手牌上方顯示聽哪些牌與各自剩餘張數。剩餘只算「公開資訊」：
+   4 −（自己手牌＋四家副露＋四家棄牌池的同款張數）；死牆與別家手牌
+   不可見、不計入（與一般麻將 App 的聽牌助手慣例相同）。設定選單
+   可關（btnTing），偏好存 localStorage mj-ting。 */
+var tingOn=(function(){ try{ return localStorage.getItem("mj-ting")!=="0"; }catch(e){ return true; } })();
+function visibleTileCount(key){
+  var n=0;
+  G.hand.forEach(function(t){ if(tileKey(t)===key) n++; });
+  for(var s=0;s<4;s++){
+    (G.melds[s]||[]).forEach(function(m){ (m.tiles||[]).forEach(function(t){ if(tileKey(t)===key) n++; }); });
+  }
+  (G.poolAll||[]).forEach(function(en){ if(tileKey(en.t)===key) n++; });
+  return n;
+}
+function updateTingBar(){
+  var bar=$("tingBar"); if(!bar) return;
+  var show=false, html="";
+  if(tingOn && G.phase!=="over" && G.wall && G.hand){
+    var need=MELDS_NEEDED-meldCount(3);
+    if(G.hand.length===need*3+1){
+      var waits=waitingTilesFor(3);
+      if(waits.length){
+        var total=0, parts=[];
+        waits.forEach(function(t){
+          var left=Math.max(0, 4-visibleTileCount(tileKey(t)));
+          total+=left;
+          parts.push('<span class="ting-tile">'+tileName(t)+'</span>（剩 '+left+'）');
+        });
+        html="👂 你聽牌了："+parts.join("・")+"——共 "+total+" 張";
+        show=true;
+      }
+    }
+  }
+  bar.innerHTML=html;
+  bar.classList.toggle("show", show);
+}
+(function(){
+  var b=$("btnTing"); if(!b) return;
+  function sync(){ b.textContent=tingOn?"👂 聽牌提示：開":"👂 聽牌提示：關"; b.classList.toggle("toggle-on", tingOn); b.setAttribute("aria-pressed", String(tingOn)); }
+  sync();
+  b.addEventListener("click", function(){
+    tingOn=!tingOn;
+    try{ localStorage.setItem("mj-ting", tingOn?"1":"0"); }catch(e){}
+    sync();
+    try{ updateTingBar(); }catch(e){}
+  });
+})();
 function renderFlowers(){
   /* 花牌顯示已改去副露區（2026-10-31 定版：花跟副露放一起、桌面上
      不再有獨立花牌列）：玩家的花排進左下副露角落、三隻貓的花排進
@@ -1884,19 +1939,49 @@ function seatsAfter(seat){
 
 /* 貓的出牌 AI（簡單牌感）：留住有搭的牌，打最孤張的——刻/對/順搭加分，
    字牌孤張最先丟。同分時隨機一點點，避免每局同路。 */
-function botChooseDiscard(hand){
+/* ============ Bot 個性（2026-11-12 改進首批③）============
+   三隻貓在同一個基線評分上加各自的權重傾向，只動「選哪張打」的
+   評分，不碰叫牌仲裁／胡牌判定／算台：
+   ・Pop Cat（座位 0，下家）快攻型：順子材料權重放大、對子留置降，
+     孤張字牌與邊張先丟，節奏快。
+   ・Maxwell（座位 1，對家）防守型：有人副露 ≥3 組或牌牆剩 ≤24 張
+     （危險期）時，優先打「池裡已經出現過的安全牌」，沒現過的牌扣住。
+   ・CatJAM（座位 2，上家）大牌型：對子／刻子與字牌對留置大增，
+     順子材料權重打折，往碰碰胡／混一色方向湊。 */
+function botChooseDiscard(hand, seat){
   var counts={};
   hand.forEach(function(t){ counts[tileKey(t)]=(counts[tileKey(t)]||0)+1; });
+  var seenPool={};
+  (G.poolAll||[]).forEach(function(en){ seenPool[tileKey(en.t)]=1; });
+  var danger=false;
+  if(seat===1){
+    var maxMelds=0;
+    for(var s2=0;s2<4;s2++){ if(s2!==1) maxMelds=Math.max(maxMelds, meldCount(s2)); }
+    danger=(maxMelds>=3) || (G.wall && G.wall.length<=24);
+  }
   var bestIdx=0, bestScore=1e9;
   hand.forEach(function(t,i){
     var score=0;
     var c=counts[tileKey(t)]||0;
-    if(c>=2) score+=18*(c-1);            /* 對子/刻子留住 */
+    var pairKeep=18, seqNear=7, seqFar=4;
+    if(seat===0){ pairKeep=10; seqNear=11; seqFar=6; }         /* Pop：順子優先 */
+    if(seat===2){ pairKeep=26; seqNear=4; seqFar=2.5; }        /* CatJAM：刻子優先 */
+    if(c>=2) score+=pairKeep*(c-1);            /* 對子/刻子留住 */
+    if(seat===2 && t.s>=3 && c>=2) score+=8;   /* CatJAM：字牌對再加留 */
     if(t.s<=2){
       [-2,-1,1,2].forEach(function(d){
         var r=t.r+d;
-        if(r>=1&&r<=9&&counts[t.s+"-"+r]) score+= (Math.abs(d)===1?7:4);
+        if(r>=1&&r<=9&&counts[t.s+"-"+r]) score+= (Math.abs(d)===1?seqNear:seqFar);
       });
+    }
+    if(seat===0 && c===1){                    /* Pop：孤張先丟 */
+      if(t.s>=3) score-=3;
+      else if(t.r===1||t.r===9) score-=2;
+    }
+    if(seat===2 && t.s>=3 && c===1) score+=2; /* CatJAM：孤張字牌也先扣住等對 */
+    if(seat===1 && danger){                   /* Maxwell：危險期打安全牌 */
+      if(seenPool[tileKey(t)]) score-=12;
+      else { score+=3; if(t.s>=3 && c===1) score+=4; }
     }
     score+=Math.random()*2.5;
     if(score<bestScore){ bestScore=score; bestIdx=i; }
@@ -1969,7 +2054,7 @@ function botTryAddedKong(idx, opt){
 function botDiscardPhase(idx){
   if(G.phase==="over") return;
   var hand=G.botHands[idx];
-  var di=botChooseDiscard(hand);
+  var di=botChooseDiscard(hand, idx);
   var disc=hand.splice(di,1)[0];
   sortHand(hand);
   G.pools[idx].push(disc);
@@ -2675,6 +2760,32 @@ function stopWinVideo(){
   if(winVideoEl){ try{ winVideoEl.pause(); if(winVideoEl.readyState>0) winVideoEl.currentTime=0; }catch(e){} }
   if(winVideoTopEl){ try{ winVideoTopEl.pause(); if(winVideoTopEl.readyState>0) winVideoTopEl.currentTime=0; }catch(e){} }
   setWinVideoMode(false);
+  releaseWinVideoBuffers();
+}
+/* ============ 慶祝影片記憶體釋放（2026-11-12 改進首批②）============
+   慶祝結束（stopCelebration→stopWinVideo）後，把兩支影片已下載／已
+   解碼的緩衝釋放掉，降低 iOS jetsam 在下一局把頁面殺掉的風險。做法：
+   暫時拔 src→load() 強制卸載→原樣裝回 src 但 preload="none"（不會
+   自動重載）；winVideoArmed 歸零，下一局 newGame 的 __armWinVideo
+   照原定版在開局手勢後重新全量預載。拔 src 的 load() 在部分瀏覽器
+   會對元素觸發 error 事件，wireWinVideo 的 error handler 以
+   winVideoReleasing 旗標擋下這段期間的誤判（不標 failed）。 */
+var winVideoReleasing=false;
+function releaseWinVideoBuffers(){
+  winVideoReleasing=true;
+  [winVideoEl, winVideoTopEl].forEach(function(el){
+    if(!el) return;
+    try{
+      var src=el.getAttribute("src");
+      if(!src) return;
+      el.removeAttribute("src");
+      el.preload="none";
+      el.load();
+      el.setAttribute("src", src);
+    }catch(e){}
+  });
+  winVideoArmed=false;
+  setTimeout(function(){ winVideoReleasing=false; }, 600);
 }
 /* 雙播放器事件接線（2026-11-02 Version 03）：#winVideo（橫向 lite4，駐留
    stage slot）與 #winVideoTop（直向 lite5 實體預旋轉、body 頂層）共用同一
@@ -2683,6 +2794,7 @@ function wireWinVideo(el){
   /* 備援唯一真失敗入口：媒體 error 事件（檔案壞掉／格式不支援／網路確定
      失敗）。stalled／waiting／play 被拒都不算失敗。 */
   el.addEventListener("error", function(){
+    if(winVideoReleasing) return; /* 釋放緩衝期間拔 src 觸發的 error 不是真失敗（見 releaseWinVideoBuffers） */
     if(el===winVideoTopEl){
       /* lite5 真失敗：標記後若正播它，先試切回橫向元素；橫向也不可用才整場備援 */
       winVideoTopFailed=true;
