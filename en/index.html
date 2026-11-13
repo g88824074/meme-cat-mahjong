@@ -206,6 +206,9 @@ button.tile.drawn{outline:2px solid var(--teal);outline-offset:2px;transform:tra
 .hu-btn.show{display:inline-block}
 @keyframes huPulse{from{transform:scale(1)}to{transform:scale(1.045)}}
 .hint-text{font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:.02em}
+#tingBar{display:none;margin:0 0 6px;padding:6px 12px;border-radius:999px;background:#fdf3d8;border:1px solid #e3cf8f;color:#6d5716;font-size:13.5px;font-weight:700;letter-spacing:.02em;text-align:center}
+#tingBar.show{display:block}
+#tingBar .ting-tile{color:#a33c1f}
 
 /* ---------- ron banner ---------- */
 .ron-banner{display:none;background:linear-gradient(180deg,#fbf6e9,#f3ead2);border:1px solid var(--hair);color:#4a3a16;border-radius:14px;padding:13px 15px;margin-top:14px;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700;letter-spacing:.02em;box-shadow:var(--shadow-md)}
@@ -867,6 +870,7 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;visi
       <button class="btn toggle-on" id="btnSfx" type="button" aria-pressed="true">🔊 Sound: On</button>
       <button class="btn" id="btnInfo" type="button">📖 Instructions · Collection</button>
       <button class="btn toggle-on" id="btnBgm" type="button" aria-pressed="true">🎵 Music: On</button>
+      <button class="btn toggle-on" id="btnTing" type="button" aria-pressed="true">👂 Tenpai Hint: On</button>
       <button class="btn" id="btnHome" type="button">🏠 Start Screen (Change bet)</button>
     </div>
     <div class="stats">
@@ -957,6 +961,7 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;visi
          副露增減不擠壓手牌；沒有副露時角落整組隱藏。 -->
     <span id="statusMsg" role="status" style="display:none">Press "New Game" to start playing with the cats!</span>
     <span id="wallInfo" style="display:none">🀄 Wall: –</span>
+    <div id="tingBar" role="status"></div>
     <div class="play-row">
       <div class="melds-row melds-corner" id="meldsCorner" style="display:none"><span id="myMelds"></span></div>
       <div class="rack"><div class="hand" id="hand"></div></div>
@@ -995,8 +1000,8 @@ body.celebrating .overlay{backdrop-filter:none;-webkit-backdrop-filter:none;visi
       <li><b>Chow · Pong · Kong (same as real Mahjong):</b>If you can form a set with a tile discarded by others, a banner will appear for you to choose—<b>Pong</b>(have 2 identical tiles),<b>Kong</b>(3 identical tiles, draw 1 after Kong),<b>Chow</b>(Can only Chow<b>Upper house</b>discarded tiles to form sequences in the same suit), press "Pass" to ignore. When you draw a 4th identical tile, you can<b>Concealed Kong</b>, if you Pong and then draw the 4th, you can<b>Add-Kong</b>(Button appears next to hand; added Kong can be<b>Robbing a Kong</b>win, concealed Kongs are not). Call priority is the same as real Mahjong:<b>Ron > Pong/Kong > Chow</b>. The three cats will also Chow, Pong, and Kong on their own; called sets will be shown in their meld areas. It is normal to have fewer tiles in hand after melding (melded sets are complete and not counted in the hand).</li>
       <li><b>Background music BGM:</b>The music playing softly throughout the match is<b>Self-made piano arrangement · slow soft version (long version)</b>(3 min 54 sec seamless loop): Melody based on Piano Tutorial slow section<b>Note-by-note transcription</b>Restores the main riff of Spencer & Hill's "Cool" (Source: YouTube rBfxV_lJPfk Yellow Notes Piano Tutorial from 0:59, verified at 0.25x speed; uncertain repeat count for one E, used 2 instead of 3), then arranged into a long version (intro → theme → bass range → theme+harmony → interlude → high range → theme → outro) rendered with piano tone.<b>Honest disclosure: This is a self-made piano arrangement, not a professional recording, and does not use the original "Cool" music files.</b>Volume is intentionally lowered (files were pre-processed with lower volume, as mobile browsers ignore volume settings in players). BGM starts after first interaction (browser requirement). Control independently in "⚙️ Settings" (top right). BGM pauses when celebration screen appears, prioritizing the dance song, then resumes at low volume when closed.</li>
       <li><b>Discard sound effects (audio cues):</b>Each player has their own signature meme sound—you (Huh Cat) are the rising "Huh?", Pop Cat is a "Bop", Maxwell is a low mumble, CatJAM is a beat-nodding rhythm, with a Mahjong tile clicking sound layered on top; drawing also has a tap sound. All are tribute sounds synthesized in real-time via WebAudio (no sound files stolen). Toggle in "⚙️ Settings" (top right).</li>
-      <li><b>Tsumo and Ron:</b>If you draw a winning tile, press "Tsumo win"; if a cat discards your winning tile, that's<b>Ron (Win by discard)</b>, press the "Ron!" button to win (press "Pass" to ignore). Being one tile away from winning is called<b>Ready hand</b>, judge which tiles to wait on yourself (no screen hints).</li>
-      <li><b>Helper:</b>At the start, 16 tiles are dealt randomly to all four players; no pre-arranged hands. Your hand will<b>Auto-sort hand</b>(Hand auto-sorts after drawing/discarding; drawn tile briefly highlighted), no manual sorting, no hints — play by your card sense.<b>Dead wall (standard rules):</b>16 tiles remain in the dead wall; if the living wall is exhausted and nobody has won, it's an<b>Exhaustive draw</b>; Kong-draws and flower-replacements come from the end of the wall<b>Replacement tile</b>take it; Last Tile Win/Win by Last Discard are also determined by drawing from the remaining wall. Just play another round.</li>
+      <li><b>Tsumo and Ron:</b>If you draw a winning tile, press "Tsumo win"; if a cat discards your winning tile, that's<b>Ron (Win by discard)</b>, press the "Ron!" button to win (press "Pass" to ignore). Being one tile away from winning is called<b>Ready hand</b>; a hint bar above your hand then lists your winning tiles and how many copies remain (counting only visible tiles: your hand, everyone's melds and the discard pool). Turn it off in ⚙️ Settings ("Tenpai Hint") if you prefer to judge yourself.</li>
+      <li><b>Helper:</b>At the start, 16 tiles are dealt randomly to all four players; no pre-arranged hands. Your hand will<b>Auto-sort hand</b>(Hand auto-sorts after drawing/discarding; drawn tile briefly highlighted), no manual sorting; the only helper is the optional Tenpai Hint bar — otherwise play by your card sense.<b>Dead wall (standard rules):</b>16 tiles remain in the dead wall; if the living wall is exhausted and nobody has won, it's an<b>Exhaustive draw</b>; Kong-draws and flower-replacements come from the end of the wall<b>Replacement tile</b>take it; Last Tile Win/Win by Last Discard are also determined by drawing from the remaining wall. Just play another round.</li>
     </ul>
   </details>
 
@@ -1672,7 +1677,60 @@ function updateStats(){
     var dn=(G.dealer===3)?"You":CATS[G.dealer].name;
     sd.textContent=WIND[G.roundWind||1]+"Round · "+dn+"Dealer (East)"+(G.renchan>0?" · Repeated Dealer "+G.renchan:"");
   }
+  try{ updateTingBar(); }catch(e){}
 }
+/* ============ Tenpai hint (2026-11-12 improvement batch 1) ============
+   When the player's hand is in tenpai (concealed tiles = need*3+1 and
+   waitingTilesFor finds waits), show a bar above the hand listing the
+   winning tiles and how many copies remain. "Remaining" counts public
+   information only: 4 - (own hand + all four players' melds + all
+   discards); the dead wall and other hands are unseen and not counted
+   (the usual convention for tenpai helpers). Toggle in Settings
+   (btnTing), preference in localStorage mj-ting. */
+var tingOn=(function(){ try{ return localStorage.getItem("mj-ting")!=="0"; }catch(e){ return true; } })();
+function visibleTileCount(key){
+  var n=0;
+  G.hand.forEach(function(t){ if(tileKey(t)===key) n++; });
+  for(var s=0;s<4;s++){
+    (G.melds[s]||[]).forEach(function(m){ (m.tiles||[]).forEach(function(t){ if(tileKey(t)===key) n++; }); });
+  }
+  (G.poolAll||[]).forEach(function(en){ if(tileKey(en.t)===key) n++; });
+  return n;
+}
+function updateTingBar(){
+  var bar=$("tingBar"); if(!bar) return;
+  var show=false, html="";
+  if(tingOn && G.phase!=="over" && G.wall && G.hand){
+    var need=MELDS_NEEDED-meldCount(3);
+    if(G.hand.length===need*3+1){
+      var waits=waitingTilesFor(3);
+      if(waits.length){
+        var total=0, parts=[];
+        waits.forEach(function(t){
+          var left=Math.max(0, 4-visibleTileCount(tileKey(t)));
+          total+=left;
+          parts.push('<span class="ting-tile">'+tileName(t)+'</span> ('+left+' left)');
+        });
+        html="👂 You're in tenpai: "+parts.join(" · ")+" — "+total+" winning tiles";
+        show=true;
+      }
+    }
+  }
+  bar.innerHTML=html;
+  bar.classList.toggle("show", show);
+}
+(function(){
+  var b=$("btnTing"); if(!b) return;
+  function sync(){ b.textContent=tingOn?"👂 Tenpai Hint: On":"👂 Tenpai Hint: Off"; b.classList.toggle("toggle-on", tingOn); b.setAttribute("aria-pressed", String(tingOn)); }
+  sync();
+  b.addEventListener("click", function(){
+    tingOn=!tingOn;
+    try{ localStorage.setItem("mj-ting", tingOn?"1":"0"); }catch(e){}
+    sync();
+    try{ updateTingBar(); }catch(e){}
+  });
+})();
+
 function renderFlowers(){
   /* 花牌顯示已改去副露區（2026-10-31 定版：花跟副露放一起、桌面上
      不再有獨立花牌列）：玩家的花排進左下副露角落、三隻貓的花排進
@@ -1884,19 +1942,51 @@ function seatsAfter(seat){
 
 /* 貓的出牌 AI（簡單牌感）：留住有搭的牌，打最孤張的——刻/對/順搭加分，
    字牌孤張最先丟。同分時隨機一點點，避免每局同路。 */
-function botChooseDiscard(hand){
+/* ============ Bot personalities (2026-11-12 improvement batch 1) ============
+   Each cat adds its own weights on top of the shared baseline discard
+   scoring; only "which tile to discard" changes — claim arbitration,
+   win checks and tai scoring are untouched:
+   - Pop Cat (seat 0, right): fast/sequence type — sequence material
+     weighs more, pairs less; isolated honors and terminals go first.
+   - Maxwell (seat 1, across): defensive — in danger (any opponent has
+     3+ melds or the wall is down to 24), discards tiles already seen
+     in the pool and holds unseen ones.
+   - CatJAM (seat 2, left): big-hand type — pairs/triplets and honor
+     pairs weigh much more, sequences less (pungs / half-flush drift). */
+function botChooseDiscard(hand, seat){
   var counts={};
   hand.forEach(function(t){ counts[tileKey(t)]=(counts[tileKey(t)]||0)+1; });
+  var seenPool={};
+  (G.poolAll||[]).forEach(function(en){ seenPool[tileKey(en.t)]=1; });
+  var danger=false;
+  if(seat===1){
+    var maxMelds=0;
+    for(var s2=0;s2<4;s2++){ if(s2!==1) maxMelds=Math.max(maxMelds, meldCount(s2)); }
+    danger=(maxMelds>=3) || (G.wall && G.wall.length<=24);
+  }
   var bestIdx=0, bestScore=1e9;
   hand.forEach(function(t,i){
     var score=0;
     var c=counts[tileKey(t)]||0;
-    if(c>=2) score+=18*(c-1);            /* 對子/刻子留住 */
+    var pairKeep=18, seqNear=7, seqFar=4;
+    if(seat===0){ pairKeep=10; seqNear=11; seqFar=6; }
+    if(seat===2){ pairKeep=26; seqNear=4; seqFar=2.5; }
+    if(c>=2) score+=pairKeep*(c-1);
+    if(seat===2 && t.s>=3 && c>=2) score+=8;
     if(t.s<=2){
       [-2,-1,1,2].forEach(function(d){
         var r=t.r+d;
-        if(r>=1&&r<=9&&counts[t.s+"-"+r]) score+= (Math.abs(d)===1?7:4);
+        if(r>=1&&r<=9&&counts[t.s+"-"+r]) score+= (Math.abs(d)===1?seqNear:seqFar);
       });
+    }
+    if(seat===0 && c===1){
+      if(t.s>=3) score-=3;
+      else if(t.r===1||t.r===9) score-=2;
+    }
+    if(seat===2 && t.s>=3 && c===1) score+=2;
+    if(seat===1 && danger){
+      if(seenPool[tileKey(t)]) score-=12;
+      else { score+=3; if(t.s>=3 && c===1) score+=4; }
     }
     score+=Math.random()*2.5;
     if(score<bestScore){ bestScore=score; bestIdx=i; }
@@ -1969,7 +2059,7 @@ function botTryAddedKong(idx, opt){
 function botDiscardPhase(idx){
   if(G.phase==="over") return;
   var hand=G.botHands[idx];
-  var di=botChooseDiscard(hand);
+  var di=botChooseDiscard(hand, idx);
   var disc=hand.splice(di,1)[0];
   sortHand(hand);
   G.pools[idx].push(disc);
@@ -2675,6 +2765,33 @@ function stopWinVideo(){
   if(winVideoEl){ try{ winVideoEl.pause(); if(winVideoEl.readyState>0) winVideoEl.currentTime=0; }catch(e){} }
   if(winVideoTopEl){ try{ winVideoTopEl.pause(); if(winVideoTopEl.readyState>0) winVideoTopEl.currentTime=0; }catch(e){} }
   setWinVideoMode(false);
+  releaseWinVideoBuffers();
+}
+/* ============ Win-video memory release (2026-11-12 improvement batch 1) ============
+   After the celebration ends (stopCelebration -> stopWinVideo), release
+   the two videos' downloaded/decoded buffers to lower the chance iOS
+   jetsam kills the page during the next round: pull src -> load() to
+   force unload -> restore the same src with preload="none" (no auto
+   reload); winVideoArmed resets so the next newGame's __armWinVideo
+   preloads in full at the start gesture, as designed. Pulling src can
+   fire an error event on the element in some browsers; the wireWinVideo
+   error handler ignores errors while winVideoReleasing is set. */
+var winVideoReleasing=false;
+function releaseWinVideoBuffers(){
+  winVideoReleasing=true;
+  [winVideoEl, winVideoTopEl].forEach(function(el){
+    if(!el) return;
+    try{
+      var src=el.getAttribute("src");
+      if(!src) return;
+      el.removeAttribute("src");
+      el.preload="none";
+      el.load();
+      el.setAttribute("src", src);
+    }catch(e){}
+  });
+  winVideoArmed=false;
+  setTimeout(function(){ winVideoReleasing=false; }, 600);
 }
 /* 雙播放器事件接線（2026-11-02 Version 03）：#winVideo（橫向 lite4，駐留
    stage slot）與 #winVideoTop（直向 lite5 實體預旋轉、body 頂層）共用同一
@@ -2683,6 +2800,7 @@ function wireWinVideo(el){
   /* 備援唯一真失敗入口：媒體 error 事件（檔案壞掉／格式不支援／網路確定
      失敗）。stalled／waiting／play 被拒都不算失敗。 */
   el.addEventListener("error", function(){
+    if(winVideoReleasing) return; /* src-pull during buffer release is not a real failure (see releaseWinVideoBuffers) */
     if(el===winVideoTopEl){
       /* lite5 真失敗：標記後若正播它，先試切回橫向元素；橫向也不可用才整場備援 */
       winVideoTopFailed=true;
